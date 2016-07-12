@@ -70,7 +70,10 @@ System.exit(0); заменил на return;
 
 лишний cast (int) убрал
 
-numberOfEntrance - 
+При проверке подъезда выявил баг, сделал проверку на деление
+Еще один баг при подсчете количества квартир в нашем подъезде, тоже сделал проверку
+как вычислить положение при помощи остатка деления - пока не могу понять.
+
 
 ____________________________________________________________
 
@@ -104,12 +107,136 @@ public class Apartments {
         }
 
         int amountOfFloors = apartmentToSearch / 4;
-        int numberOfEntrance = amountOfFloors / floors;
-        System.out.print("your entrance is " + (numberOfEntrance + 1));
+        int numberOfEntrance =  amountOfFloors / floors;
+        int checkNumberOfEntrance = amountOfFloors % floors;
+        if(checkNumberOfEntrance == 0 ) {
+            if(numberOfEntrance <= 0){
+                numberOfEntrance = 1;
+            }
+            System.out.print("your entrance is " + numberOfEntrance);
+        } else if (checkNumberOfEntrance != 0 ){
+            numberOfEntrance = numberOfEntrance + 1;
+            System.out.print("your entrance is " + numberOfEntrance);
+        }
 
-        int apartrmentsInPreviousEntrances = numberOfEntrance * floors * 4;
+        int apartrmentsInPreviousEntrances = (numberOfEntrance - 1)  * floors * 4;
         int apartmentsInYourEntrance = apartmentToSearch - apartrmentsInPreviousEntrances;
         int beforeYourFloor = apartmentsInYourEntrance / 4;
+        int checkYourFloor =  apartmentsInYourEntrance % 4;
+        if(checkYourFloor == 0){
+            System.out.print(" and your floor is " + beforeYourFloor + "\nYour apartment is closest to right");
+            return;
+        }
+        System.out.println(" and your floor is " + (beforeYourFloor + 1));
+
+        int apartmentsBeforeYourFloor = beforeYourFloor * 4;
+        int yourApartment = apartmentsInYourEntrance - apartmentsBeforeYourFloor;
+        if (yourApartment == 1) {
+            System.out.println("Your apartment is closest to left");
+        } else if (yourApartment == 2) {
+            System.out.println("Your apartment is far to left");
+        } else if (yourApartment == 3) {
+            System.out.println("Your apartment is far to the right");
+        } else if (yourApartment == 4) {
+            System.out.println("Your apartment is closest to the right");
+        }
+    }
+}
+
+_________________________________________________________________
+
+
+1. Тут опечатка, IDEA подчеркивает зеленым
+http://joxi.ru/l2ZV8J6tBREN2J
+
+2. А тут warning, надо исправить, тоже выделено цветом:
+http://joxi.ru/brR8OX6TNLY421
+Это потому что там возможно всего 2 варианта - переменная равна 0 или не равна.
+Поэтому там не нужен else if, можно использовать просто else
+
+3. В этой строке:
+http://joxi.ru/eAO4a31Cd6pQro
+Там лучше использовать printf, чтобы избежать конкатенации строк (это есть в презентации 2). И это лучше читается.
+Используйте printf везде, где встречается конкатенация двух фиксированных строк и переменной между ними.
+
+И ещё - лучше не начинать строку с \n. Лучше сделать отдельную команду println() без аргументов, она просто печатает перевод строки.
+Так будет логически чище, что println будет печатать строку с начала, а не сначала завершать предыдущую строку.
+
+4. Для 4 надо сделать отдельную переменную, потому что это значение встречается в коде много раз.
+Это лучше по двум причинам:
+- у переменной будет хорошее имя, а у числа его нет
+- так значение будет объявлено в одном месте и его будет проще поменять, если это потребуется
+
+5. У вас номер подъезда, номер этажа и положение квартиры вычисляются очень сложно.
+Есть какие-то if'ы, поправки и т.д.
+Там можно просто подобрать формулы, по которым каждая из этих вещей будет вычисляться в одну строку.
+Эту версию тоже оставьте, но попробуйте придумать способ попроще.
+
+
+_________________________________________________________________
+
+
+Переработал логику вычисления подъезда, теперь все работает без багов
+В оставшеася коде исправил замечания.
+
+_________________________________________________________________
+
+
+// Find entrance, floor and position of apartment.
+
+import java.util.Scanner;
+
+public class Apartments {
+    public static void main(String[] args) {
+
+        Scanner userInput = new Scanner(System.in);
+
+        System.out.println("We are about to find the position of apartment.");
+        System.out.print("Please enter amount of entrances ");
+        int entrances = userInput.nextInt();
+
+        System.out.print("Please enter amount of floors ");
+        int floors = userInput.nextInt();
+
+        int apartments = entrances * floors * 4;
+
+        System.out.println();
+        System.out.printf("Well, this building contains " + entrances + " entrances  " + floors + " floors  and " + apartments + " apartments");
+
+        System.out.println();
+        int amountOfApartments = floors * 4;
+        int numbersOfApartments = 1;
+
+        for( int i = 1 ; i <= entrances; i++){
+            System.out.print("Apartments in " + i + " entrance  " + numbersOfApartments);
+            numbersOfApartments = (numbersOfApartments + amountOfApartments);
+            System.out.println(" - " + (numbersOfApartments - 1));
+        }
+
+        System.out.println();
+        System.out.print("Please enter the number of apartment ");
+        int apartmentToSearch = userInput.nextInt();
+
+        if (apartmentToSearch > apartments || apartmentToSearch < 1) {
+            System.out.println("In this building no such apartment.");
+            return;
+        }
+
+        int yourEntrance = 0;
+        for( int i = 1 ; i <= apartmentToSearch; i =i + amountOfApartments){
+            yourEntrance = yourEntrance + 1;
+        }
+
+        System.out.print("Your entrance is " + yourEntrance);
+
+        int apartmentsInPreviousEntrances = (yourEntrance - 1)  * floors * 4;
+        int apartmentsInYourEntrance = apartmentToSearch - apartmentsInPreviousEntrances;
+        int beforeYourFloor = apartmentsInYourEntrance / 4;
+        int checkYourFloor =  apartmentsInYourEntrance % 4;
+        if(checkYourFloor == 0){
+            System.out.print(" and your floor is " + beforeYourFloor + "\nYour apartment is closest to right");
+            return;
+        }
         System.out.println(" and your floor is " + (beforeYourFloor + 1));
 
         int apartmentsBeforeYourFloor = beforeYourFloor * 4;
@@ -127,12 +254,118 @@ public class Apartments {
 }
 
 
-_________________________________________________________________
+__________________________________________________________________________________
+
+1. Printf нужно использовать не так - не должно быть конкатенации.
+Нужно вставлять метки вроде %d, %s и т.д.
+Printf надо применить везде, где печатается какой-то фиксированный текст, потом идёт переменная, а потом опять фиксированный текст.
+Такие места ещё остались в программе.
+
+И ещё - в printf вместо \n надо использовать %n, это правильный перевод строки, верный для всех платформ.
+
+2. Примените выравнивание кода
+
+3. Эту версию алгоритма тоже оставьте, но нужно сделать гораздо проще.
+Тут можно обойтись без циклов, можно подобрать формулу, по которой номер подъезда сразу вычисляется.
+Аналогично для номера этажа и положения квартиры.
+Причем эти формулы будут достаточно простые.
+
+4. Для числа 4 не сделали переменную
+
+____________________________________________________________________________________
+
+printf поправил, (в том числе перенос сторки)
+код отформатировал
+для количества квартир на этаже ввел переменную apartmentsOnFloor (в коде, юзеру не стал давать вводить)
+более простой алгоритм вычисления пока никак не приходит в голову.
+
+
+____________________________________________________________________________________
+
+
+
+// Find entrance, floor and position of apartment.
+
+import java.util.Scanner;
+
+public class Apartments {
+    public static void main(String[] args) {
+
+        Scanner userInput = new Scanner(System.in);
+
+        System.out.println("We are about to find the position of apartment.");
+        System.out.print("Please enter amount of entrances ");
+        int entrances = userInput.nextInt();
+
+        System.out.print("Please enter amount of floors ");
+        int floors = userInput.nextInt();
+
+        int apartmentsOnFloor = 4;
+        int apartments = entrances * floors * apartmentsOnFloor;
+
+        System.out.println();
+        System.out.printf("Well, this building contains %d  entrances  %d floors  and %d apartments", entrances, floors, apartments);
+
+        System.out.println();
+        int amountOfApartments = floors * apartmentsOnFloor;
+        int numbersOfApartments = 1;
+
+        for (int i = 1; i <= entrances; i++) {
+            System.out.printf("Apartments in %2d entrance  %3d", i, numbersOfApartments);   // %2d  two signs always
+            numbersOfApartments = (numbersOfApartments + amountOfApartments);
+            System.out.println(" - " + (numbersOfApartments - 1));
+        }
+
+        System.out.println();
+        System.out.print("Please enter the number of apartment ");
+        int apartmentToSearch = userInput.nextInt();
+
+        if (apartmentToSearch > apartments || apartmentToSearch < 1) {
+            System.out.println("In this building no such apartment.");
+            return;
+        }
+
+        int yourEntrance = 0;
+        for (int i = 1; i <= apartmentToSearch; i = i + amountOfApartments) {
+            yourEntrance = yourEntrance + 1;
+        }
+
+        System.out.print("Your entrance is " + yourEntrance);
+
+        int apartmentsInPreviousEntrances = (yourEntrance - 1) * floors * apartmentsOnFloor;
+        int apartmentsInYourEntrance = apartmentToSearch - apartmentsInPreviousEntrances;
+        int beforeYourFloor = apartmentsInYourEntrance / apartmentsOnFloor;
+        int checkYourFloor = apartmentsInYourEntrance % apartmentsOnFloor;
+        if (checkYourFloor == 0) {
+            System.out.printf(" and your floor is %d %nYour apartment is closest to right", beforeYourFloor);   // %n - next line in printf
+            return;
+        }
+        System.out.println(" and your floor is " + (beforeYourFloor + 1));
+
+        int apartmentsBeforeYourFloor = beforeYourFloor * apartmentsOnFloor;
+        int yourApartment = apartmentsInYourEntrance - apartmentsBeforeYourFloor;
+        if (yourApartment == 1) {
+            System.out.println("Your apartment is closest to left");
+        } else if (yourApartment == 2) {
+            System.out.println("Your apartment is far to left");
+        } else if (yourApartment == 3) {
+            System.out.println("Your apartment is far to the right");
+        } else if (yourApartment == 4) {
+            System.out.println("Your apartment is closest to the right");
+        }
+    }
+}
+
+
+____________________________________________________________________________________
 
 
 
 
 
+
+
+____________________________________________________________________________________
 
 
 

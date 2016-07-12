@@ -15,10 +15,23 @@ public class Apartments {
         System.out.print("Please enter amount of floors ");
         int floors = userInput.nextInt();
 
-        int apartments = entrances * floors * 4;
+        int apartmentsOnFloor = 4;
+        int apartments = entrances * floors * apartmentsOnFloor;
 
-        System.out.println("\nWell, this building contains " + entrances + " entrances  " + floors + " floors  and " + apartments + " apartments");
+        System.out.println();
+        System.out.printf("Well, this building contains %d  entrances  %d floors  and %d apartments", entrances, floors, apartments);
 
+        System.out.println();
+        int amountOfApartments = floors * apartmentsOnFloor;
+        int numbersOfApartments = 1;
+
+        for (int i = 1; i <= entrances; i++) {
+            System.out.printf("Apartments in %2d entrance  %3d", i, numbersOfApartments);   // %2d  two signs always
+            numbersOfApartments = (numbersOfApartments + amountOfApartments);
+            System.out.println(" - " + (numbersOfApartments - 1));
+        }
+
+        System.out.println();
         System.out.print("Please enter the number of apartment ");
         int apartmentToSearch = userInput.nextInt();
 
@@ -27,16 +40,24 @@ public class Apartments {
             return;
         }
 
-        int amountOfFloors = apartmentToSearch / 4;
-        int numberOfEntrance = amountOfFloors / floors;
-        System.out.print("your entrance is " + (numberOfEntrance + 1));
+        int yourEntrance = 0;
+        for (int i = 1; i <= apartmentToSearch; i = i + amountOfApartments) {
+            yourEntrance = yourEntrance + 1;
+        }
 
-        int apartrmentsInPreviousEntrances = numberOfEntrance * floors * 4;
-        int apartmentsInYourEntrance = apartmentToSearch - apartrmentsInPreviousEntrances;
-        int beforeYourFloor = apartmentsInYourEntrance / 4;
+        System.out.print("Your entrance is " + yourEntrance);
+
+        int apartmentsInPreviousEntrances = (yourEntrance - 1) * floors * apartmentsOnFloor;
+        int apartmentsInYourEntrance = apartmentToSearch - apartmentsInPreviousEntrances;
+        int beforeYourFloor = apartmentsInYourEntrance / apartmentsOnFloor;
+        int checkYourFloor = apartmentsInYourEntrance % apartmentsOnFloor;
+        if (checkYourFloor == 0) {
+            System.out.printf(" and your floor is %d %nYour apartment is closest to right", beforeYourFloor);   // %n - next line in printf
+            return;
+        }
         System.out.println(" and your floor is " + (beforeYourFloor + 1));
 
-        int apartmentsBeforeYourFloor = beforeYourFloor * 4;
+        int apartmentsBeforeYourFloor = beforeYourFloor * apartmentsOnFloor;
         int yourApartment = apartmentsInYourEntrance - apartmentsBeforeYourFloor;
         if (yourApartment == 1) {
             System.out.println("Your apartment is closest to left");
